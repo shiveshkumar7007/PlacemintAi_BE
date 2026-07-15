@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
-  const token = req.cookies.token;
+  const token = req.cookies?.token;
 
   if (!token) {
     const error = new Error("Please login to continue");

@@ -29,11 +29,20 @@ const resumeSchema = new mongoose.Schema(
         default: 0,
       },
 
-      strengths: [String],
+      strengths: {
+        type: [String],
+        default: [],
+      },
 
-      weaknesses: [String],
+      weaknesses: {
+        type: [String],
+        default: [],
+      },
 
-      suggestions: [String],
+      suggestions: {
+        type: [String],
+        default: [],
+      },
     },
   },
 

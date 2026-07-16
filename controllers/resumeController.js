@@ -8,12 +8,12 @@ import { encryptData, decryptData } from "../utils/encryption.js";
 
 import analyzeResume from "../services/aiService.js";
 
+// Upload Resume
+
 export const uploadResume = asyncHandler(async (req, res) => {
   if (!req.file) {
     const error = new Error("Please upload a PDF");
-
     error.statusCode = 400;
-
     throw error;
   }
 
@@ -28,6 +28,24 @@ export const uploadResume = asyncHandler(async (req, res) => {
   await parser.destroy();
 
   const encrypted = encryptData(extractedText);
+
+  // keep only latest 5 resumes
+
+  const resumeCount = await Resume.countDocuments({
+    user: req.user._id,
+  });
+
+  if (resumeCount >= 5) {
+    const oldestResume = await Resume.findOne({
+      user: req.user._id,
+    }).sort({
+      createdAt: 1,
+    });
+
+    if (oldestResume) {
+      await Resume.findByIdAndDelete(oldestResume._id);
+    }
+  }
 
   const resume = await Resume.create({
     user: req.user._id,
@@ -45,8 +63,12 @@ export const uploadResume = asyncHandler(async (req, res) => {
     message: "Resume uploaded successfully",
 
     resumeId: resume._id,
+
+    uploadedAt: resume.createdAt,
   });
 });
+
+// Analyze Resume
 
 export const analyzeMyResume = asyncHandler(async (req, res) => {
   const resume = await Resume.findOne({
@@ -63,19 +85,13 @@ export const analyzeMyResume = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  // decrypt text
-
   const resumeText = decryptData(
     resume.encryptedText,
 
     resume.iv,
   );
 
-  // send to AI
-
   const analysis = await analyzeResume(resumeText);
-
-  // save AI result
 
   resume.analysis = analysis;
 
@@ -87,5 +103,25 @@ export const analyzeMyResume = asyncHandler(async (req, res) => {
     message: "Resume analyzed successfully",
 
     analysis,
+  });
+});
+
+// Resume History
+
+export const getResumeHistory = asyncHandler(async (req, res) => {
+  const resumes = await Resume.find({
+    user: req.user._id,
+  })
+
+    .select("fileName analysis.score createdAt")
+
+    .sort({
+      createdAt: -1,
+    });
+
+  res.status(200).json({
+    success: true,
+
+    resumes,
   });
 });

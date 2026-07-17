@@ -125,3 +125,26 @@ export const getResumeHistory = asyncHandler(async (req, res) => {
     resumes,
   });
 });
+
+export const getLatestResume = asyncHandler(async (req, res) => {
+    const resume = await Resume.findOne({
+      user: req.user._id,
+    })
+      .sort({
+        createdAt: -1,
+      })
+      .select("fileName analysis createdAt");
+
+    if (!resume) {
+      return res.status(200).json({
+        success: true,
+        resume: null,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+
+      resume,
+    });
+  });

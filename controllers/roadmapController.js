@@ -91,3 +91,127 @@ export const getRoadmapHistory = asyncHandler(async (req, res) => {
     roadmaps,
   });
 });
+
+export const markDayCompleted = asyncHandler(async (req, res) => {
+  const { roadmapId, day } = req.params;
+
+  const roadmap = await Roadmap.findOne({
+    _id: roadmapId,
+    user: req.user._id,
+  });
+
+  if (!roadmap) {
+    const error = new Error("Roadmap not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (roadmap.status !== "ACTIVE") {
+    const error = new Error("Only active roadmaps can be updated.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const currentDay = roadmap.roadmap.find((item) => item.day === Number(day));
+
+  if (!currentDay) {
+    const error = new Error("Day not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  currentDay.completed = !currentDay.completed;
+
+  currentDay.completedAt = currentDay.completed ? new Date() : null;
+
+  await roadmap.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Day ${day} updated successfully.`,
+    roadmap,
+  });
+});
+
+export const completeRoadmap = asyncHandler(async (req, res) => {
+  const roadmap = await Roadmap.findOne({
+    _id: req.params.id,
+    user: req.user._id,
+  });
+
+  if (!roadmap) {
+    const error = new Error("Roadmap not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (roadmap.status === "COMPLETED") {
+    const error = new Error("Roadmap is already completed.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (roadmap.status === "ABANDONED") {
+    const error = new Error("Dropped roadmaps cannot be completed.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Mark every day completed
+  roadmap.roadmap.forEach((day) => {
+    if (!day.completed) {
+      day.completed = true;
+      day.completedAt = new Date();
+    }
+  });
+
+  roadmap.status = "COMPLETED";
+  roadmap.completedAt = new Date();
+
+  await roadmap.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Congratulations! Goal marked as completed.",
+    roadmap,
+  });
+});
+
+export const abandonRoadmap = asyncHandler(async (req, res) => {
+  const { reason } = req.body;
+
+  const roadmap = await Roadmap.findOne({
+    _id: req.params.id,
+    user: req.user._id,
+  });
+
+  if (!roadmap) {
+    const error = new Error("Roadmap not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (roadmap.status === "ABANDONED") {
+    const error = new Error("Roadmap is already dropped.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (roadmap.status === "COMPLETED") {
+    const error = new Error("Completed roadmaps cannot be dropped.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  roadmap.status = "ABANDONED";
+  roadmap.abandonedAt = new Date();
+  roadmap.abandonReason = reason || "";
+
+  await roadmap.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Roadmap dropped successfully.",
+    roadmap,
+  });
+});

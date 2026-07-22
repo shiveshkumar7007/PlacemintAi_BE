@@ -13,6 +13,8 @@ import errorMiddleware from "./middleware/errorMiddleware.js";
 import roadmapRoutes from "./routes/roadmapRoutes.js";
 import interviewRoutes from "./routes/interviewRoutes.js";
 
+import dsaRoutes from "./routes/dsaRoutes.js";
+
 dotenv.config();
 
 connectDB();
@@ -35,6 +37,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+
 // ---------------- Routes ----------------
 
 app.get("/", (req, res) => {
@@ -52,6 +55,8 @@ app.use("/api/resume", resumeRoutes);
 app.use("/api/roadmap", roadmapRoutes);
 
 app.use("/api/interview", interviewRoutes);
+
+app.use("/api/dsa", dsaRoutes);
 
 // ---------------- Error Handler ----------------
 

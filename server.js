@@ -11,6 +11,7 @@ import resumeRoutes from "./routes/resumeRoutes.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 
 import roadmapRoutes from "./routes/roadmapRoutes.js";
+import interviewRoutes from "./routes/interviewRoutes.js";
 
 dotenv.config();
 
@@ -49,6 +50,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);
 
 app.use("/api/roadmap", roadmapRoutes);
+
+app.use("/api/interview", interviewRoutes);
 
 // ---------------- Error Handler ----------------
 

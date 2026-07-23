@@ -1,23 +1,22 @@
-import generateToken from "./generateToken.js";
-
 const sendToken = (user, statusCode, message, res) => {
-  const token = generateToken(user._id);
+  // Create JWT token (assuming your User model has a method for this, or use jsonwebtoken directly)
+  const token = user.getJWTToken ? user.getJWTToken() : user.generateToken();
 
-  res.cookie("token", token, {
+  // Options for cookie
+  const options = {
+    expires: new Date(
+      Date.now() + (process.env.COOKIE_EXPIRE || 7) * 24 * 60 * 60 * 1000,
+    ),
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+    secure: true, // Required for HTTPS in production (Vercel & Render)
+    sameSite: "none", // Required because frontend and backend are on different domains
+  };
 
-  res.status(statusCode).json({
+  res.status(statusCode).cookie("token", token, options).json({
     success: true,
     message,
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-    },
+    token,
+    user,
   });
 };
 

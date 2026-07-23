@@ -11,13 +11,15 @@ import {
 
 const router = express.Router();
 
-router.post("/create", authMiddleware, createInterview);
+// CHANGED: Removed "/create" so it listens on exactly "/"
+router.post("/", authMiddleware, createInterview);
 
 router.post("/answer/:id", authMiddleware, answerInterview);
 
 router.post("/finish/:id", authMiddleware, finishInterview);
 
-router.get("/history", authMiddleware, getInterviewHistory);
+// CHANGED: Removed "/history" so it listens on exactly "/"
+router.get("/", authMiddleware, getInterviewHistory);
 
 router.get("/:id", authMiddleware, getInterviewById);
 

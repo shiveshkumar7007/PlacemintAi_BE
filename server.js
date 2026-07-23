@@ -54,7 +54,7 @@ app.use("/api/resume", resumeRoutes);
 
 app.use("/api/roadmap", roadmapRoutes);
 
-app.use("/api/interview", interviewRoutes);
+app.use("/api/interviews", interviewRoutes);
 
 app.use("/api/dsa", dsaRoutes);
 

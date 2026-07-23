@@ -27,7 +27,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://placemint-ai-fe-seven.vercel.app",
     credentials: true,
   }),
 );
@@ -35,8 +35,6 @@ app.use(
 app.use(express.json());
 
 app.use(cookieParser());
-
-
 
 // ---------------- Routes ----------------
 
